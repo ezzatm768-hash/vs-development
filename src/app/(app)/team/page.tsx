@@ -30,7 +30,7 @@ export default function TeamPage() {
     const ev = evaluations.filter((e:any)=>e.sales_id===salesId).sort((a:any,b:any)=>b.updated_at-a.updated_at)[0];
     if(!ev) return "empty";
     const required = ["product_knowledge","communication","needs_discovery","sales_process","crm_discipline","follow_up_activity","strengths","weaknesses","main_problem","final_notes"];
-    const filled = required.filter((k)=> ev[k] && String(ev[k]).trim().length > 3).length;
+    const filled = required.filter((k)=> ev[k] && String(ev[k]).trim().length > 0).length;
     if(filled===0) return "empty";
     if(filled===required.length) return "full";
     return "partial";
@@ -68,9 +68,9 @@ export default function TeamPage() {
         {members.length === 0 ? <Empty title="لا يوجد أعضاء" desc="أضف أول موظف لبدء التقييم" /> : (
           <div className="overflow-auto">
             <table className="w-full text-sm table-fixed" dir="rtl">
-              <colgroup><col className="w-[38%]" /><col className="w-[22%]" /><col className="w-[40%]" /></colgroup>
+              <colgroup><col className="w-[28%]" /><col className="w-[18%]" /><col className="w-[18%]" /><col className="w-[36%]" /></colgroup>
               <thead className="bg-neutral-50 text-neutral-600">
-                <tr><th className="p-3 text-right">الاسم</th><th className="p-3 text-center">تاريخ الانضمام</th><th className="p-3 text-center">إجراءات</th></tr>
+                <tr><th className="p-3 text-right">الاسم</th><th className="p-3 text-center">تاريخ الانضمام</th><th className="p-3 text-center">التقييم</th><th className="p-3 text-center">إجراءات</th></tr>
               </thead>
               <tbody>
                 {members.map((m) => {
@@ -79,6 +79,11 @@ export default function TeamPage() {
                   <tr key={m.id} className="border-t border-neutral-200 hover:bg-neutral-50 h-[56px]">
                     <td className="p-3 font-bold text-black text-right truncate">{m.name}</td>
                     <td className="p-3 text-center text-black font-medium" dir="ltr">{m.join_date ? new Date(m.join_date).toLocaleDateString("en-GB") : "—"}</td>
+                    <td className="p-3 text-center">
+                      {status==="empty" && <Badge color="slate">لم يتم التقييم</Badge>}
+                      {status==="partial" && <Badge color="red">تقييم</Badge>}
+                      {status==="full" && <Badge color="emerald">مكتمل</Badge>}
+                    </td>
                     <td className="p-3">
                       <div className="flex gap-1.5 justify-center items-center">
                         <Button size="sm" variant="ghost" className="px-3 py-1.5 text-xs font-bold min-w-[56px] border border-neutral-200" onClick={() => { setEditing(m); setForm({ name: m.name, join_date: m.join_date || "" }); setShow(true); }}>تعديل</Button>

@@ -56,7 +56,7 @@ export default function EvaluationsPage() {
   const save = async (status: string) => {
     if (!selectedSales) { showToast("اختر الموظف أولاً","error"); return; }
     if(status==="submitted"){
-      const hasContent = Object.values(form).some((v:any)=> typeof v==="string" && v.trim().length>5);
+      const hasContent = Object.values(form).some((v:any)=> typeof v==="string" && v.trim().length>0);
       if(!hasContent){ showToast("اكتب تقييم كتابي قبل الإرسال","error"); return; }
       if (!confirm("هل أنت متأكد من إرسال التقييم؟")) return;
     }
