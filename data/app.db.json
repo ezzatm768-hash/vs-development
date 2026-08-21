@@ -1,0 +1,365 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "username": "msms.ezzat@gmail.com",
+      "password": "$2a$10$Fy7INsenbFZmTcOvH8bybeqRw0y4Gj6fSx9m4i6PQx62kk1p4zrj.",
+      "role": "admin",
+      "name": "MS Ezzat",
+      "team_id": null,
+      "created_at": 1787335430381
+    },
+    {
+      "id": "u2",
+      "username": "mahmoud.elew@gmail.com",
+      "password": "$2a$10$L8u3j2r4n3YhbeSW/G8ZZuZFg0osZ9yOT5THnBg/dRni3cNxlxFey",
+      "role": "team_leader",
+      "name": "محمود",
+      "team_id": "t1",
+      "created_at": 1787335430381
+    }
+  ],
+  "teams": [
+    {
+      "id": "t1",
+      "team_name": "فريق محمود",
+      "team_leader_id": "u2",
+      "created_at": 1787335430381
+    }
+  ],
+  "sales": [
+    {
+      "id": "s_1787343206259_i4of5",
+      "name": "منة",
+      "team_id": "t1",
+      "phone": "",
+      "join_date": "2026-08-21",
+      "status": "active",
+      "created_at": 1787343206259
+    },
+    {
+      "id": "s_1787343562635_61e3r",
+      "name": "فقتافلتفاى",
+      "team_id": "t1",
+      "phone": "",
+      "join_date": "2026-08-21",
+      "status": "active",
+      "created_at": 1787343562635
+    },
+    {
+      "id": "s_1787343565144_ly5dk",
+      "name": "لىلىلى",
+      "team_id": "t1",
+      "phone": "",
+      "join_date": "2026-08-21",
+      "status": "active",
+      "created_at": 1787343565144
+    },
+    {
+      "id": "s_1787343568032_k5u7o",
+      "name": "لىلى",
+      "team_id": "t1",
+      "phone": "",
+      "join_date": "2026-08-21",
+      "status": "active",
+      "created_at": 1787343568032
+    },
+    {
+      "id": "s_1787343570239_21nry",
+      "name": "لىلىلىلى",
+      "team_id": "t1",
+      "phone": "",
+      "join_date": "2026-08-21",
+      "status": "active",
+      "created_at": 1787343570239
+    },
+    {
+      "id": "s_1787343573447_xuw7w",
+      "name": "ىلىلىلىل",
+      "team_id": "t1",
+      "phone": "",
+      "join_date": "2026-08-21",
+      "status": "active",
+      "created_at": 1787343573447
+    },
+    {
+      "id": "s_1787343576503_uqt20",
+      "name": "لىلىلىلىل",
+      "team_id": "t1",
+      "phone": "",
+      "join_date": "2026-08-21",
+      "status": "active",
+      "created_at": 1787343576503
+    }
+  ],
+  "evaluation_periods": [
+    {
+      "id": "p1",
+      "name": "2026-08",
+      "start_date": "2026-07-31",
+      "end_date": "2026-08-30",
+      "period_type": "monthly",
+      "status": "active",
+      "created_at": 1787335430381
+    },
+    {
+      "id": "p_1787343423902_xhl4w",
+      "name": "خمطظخ",
+      "start_date": "1111-11-11",
+      "end_date": "0001-11-11",
+      "period_type": "monthly",
+      "status": "active",
+      "created_at": 1787343423903
+    }
+  ],
+  "evaluations": [
+    {
+      "id": "ev_1787343206259_55vf2",
+      "sales_id": "s_1787343206259_i4of5",
+      "team_leader_id": "u2",
+      "evaluation_period": "2026-08",
+      "evaluation_period_id": "p1",
+      "status": "draft",
+      "created_at": 1787343206259,
+      "updated_at": 1787343206259
+    },
+    {
+      "id": "ev_1787343423903_7tfsz",
+      "sales_id": "s_1787343206259_i4of5",
+      "team_leader_id": "u2",
+      "evaluation_period": "خمطظخ",
+      "evaluation_period_id": "p_1787343423902_xhl4w",
+      "status": "draft",
+      "created_at": 1787343423903,
+      "updated_at": 1787344351320,
+      "product_knowledge": "لالاللللللل",
+      "communication": "لالالا",
+      "needs_discovery": "لالا",
+      "sales_process": "لالا",
+      "crm_discipline": "لالالا",
+      "follow_up_activity": "لالالا",
+      "strengths": "لالا",
+      "weaknesses": "لالا",
+      "main_problem": "لالا",
+      "employee_status": "جيد",
+      "final_notes": "لالالالا",
+      "submitted_at": 1787343722127
+    },
+    {
+      "id": "ev_1787343562635_aeirk",
+      "sales_id": "s_1787343562635_61e3r",
+      "team_leader_id": "u2",
+      "evaluation_period": "2026-08",
+      "evaluation_period_id": "p1",
+      "status": "draft",
+      "created_at": 1787343562635,
+      "updated_at": 1787343562635
+    },
+    {
+      "id": "ev_1787343565144_edxp0",
+      "sales_id": "s_1787343565144_ly5dk",
+      "team_leader_id": "u2",
+      "evaluation_period": "2026-08",
+      "evaluation_period_id": "p1",
+      "status": "draft",
+      "created_at": 1787343565144,
+      "updated_at": 1787343565144
+    },
+    {
+      "id": "ev_1787343568032_wfg7w",
+      "sales_id": "s_1787343568032_k5u7o",
+      "team_leader_id": "u2",
+      "evaluation_period": "2026-08",
+      "evaluation_period_id": "p1",
+      "status": "draft",
+      "created_at": 1787343568032,
+      "updated_at": 1787343568032
+    },
+    {
+      "id": "ev_1787343570239_y5yca",
+      "sales_id": "s_1787343570239_21nry",
+      "team_leader_id": "u2",
+      "evaluation_period": "2026-08",
+      "evaluation_period_id": "p1",
+      "status": "draft",
+      "created_at": 1787343570239,
+      "updated_at": 1787343570239
+    },
+    {
+      "id": "ev_1787343573447_zlsl1",
+      "sales_id": "s_1787343573447_xuw7w",
+      "team_leader_id": "u2",
+      "evaluation_period": "2026-08",
+      "evaluation_period_id": "p1",
+      "status": "draft",
+      "created_at": 1787343573447,
+      "updated_at": 1787343573447
+    },
+    {
+      "id": "ev_1787343576503_ie4mk",
+      "sales_id": "s_1787343576503_uqt20",
+      "team_leader_id": "u2",
+      "evaluation_period": "2026-08",
+      "evaluation_period_id": "p1",
+      "status": "draft",
+      "created_at": 1787343576503,
+      "updated_at": 1787343576503
+    },
+    {
+      "id": "ev_1787343981387_7sez1",
+      "sales_id": "s_1787343562635_61e3r",
+      "team_leader_id": "u2",
+      "evaluation_period": "خمطظخ",
+      "evaluation_period_id": "p_1787343423902_xhl4w",
+      "product_knowledge": "ىاغىاغىغفىغفىت",
+      "communication": "",
+      "needs_discovery": "",
+      "sales_process": "",
+      "crm_discipline": "",
+      "follow_up_activity": "",
+      "strengths": "غتغتغتغ",
+      "weaknesses": "",
+      "main_problem": "",
+      "employee_status": "جيد",
+      "final_notes": "",
+      "status": "submitted",
+      "created_at": 1787343981387,
+      "updated_at": 1787343996603,
+      "submitted_at": 1787343996603
+    },
+    {
+      "id": "ev_1787344253882_v6moe",
+      "sales_id": "s_1787343576503_uqt20",
+      "team_leader_id": "u2",
+      "evaluation_period": "خمطظخ",
+      "evaluation_period_id": "p_1787343423902_xhl4w",
+      "product_knowledge": "ثلثقلقثلاقثلا",
+      "communication": "",
+      "needs_discovery": "",
+      "sales_process": "",
+      "crm_discipline": "",
+      "follow_up_activity": "",
+      "strengths": "",
+      "weaknesses": "",
+      "main_problem": "",
+      "employee_status": "جيد",
+      "final_notes": "",
+      "status": "submitted",
+      "created_at": 1787344253882,
+      "updated_at": 1787344253882,
+      "submitted_at": 1787344253882
+    },
+    {
+      "id": "ev_1787345727518_yezu2",
+      "sales_id": "s_1787343570239_21nry",
+      "team_leader_id": "u2",
+      "evaluation_period": "خمطظخ",
+      "evaluation_period_id": "p_1787343423902_xhl4w",
+      "product_knowledge": "افافافاف",
+      "communication": "",
+      "needs_discovery": "",
+      "sales_process": "",
+      "crm_discipline": "",
+      "follow_up_activity": "",
+      "strengths": "",
+      "weaknesses": "",
+      "main_problem": "",
+      "employee_status": "جيد",
+      "final_notes": "",
+      "status": "submitted",
+      "created_at": 1787345727518,
+      "updated_at": 1787345727518,
+      "submitted_at": 1787345727518
+    }
+  ],
+  "notifications": [
+    {
+      "id": "n_1787336507028_az234",
+      "user_id": "u1",
+      "message": "تقرير جديد من محمود",
+      "type": "info",
+      "read": 0,
+      "created_at": 1787336507026
+    },
+    {
+      "id": "n_1787336550494_6rf8v",
+      "user_id": "u1",
+      "message": "تقرير جديد من محمود",
+      "type": "info",
+      "read": 0,
+      "created_at": 1787336550493
+    },
+    {
+      "id": "n_1787336966525_0bxnm",
+      "user_id": "u1",
+      "message": "تقرير جديد من محمود",
+      "type": "info",
+      "read": 0,
+      "created_at": 1787336966524
+    },
+    {
+      "id": "n_1787343423903_xm9xj",
+      "user_id": "u2",
+      "message": "فترة تقييم جديدة بدأت: خمطظخ",
+      "type": "info",
+      "read": 0,
+      "created_at": 1787343423903
+    },
+    {
+      "id": "n_1787343609156_4bg8h",
+      "user_id": "u1",
+      "message": "تقرير جديد من محمود",
+      "type": "info",
+      "read": 0,
+      "created_at": 1787343609154
+    },
+    {
+      "id": "n_1787343722128_m33et",
+      "user_id": "u1",
+      "message": "تقرير جديد من محمود",
+      "type": "info",
+      "read": 0,
+      "created_at": 1787343722127
+    },
+    {
+      "id": "n_1787343981390_pg137",
+      "user_id": "u1",
+      "message": "تقرير جديد من محمود",
+      "type": "info",
+      "read": 0,
+      "created_at": 1787343981387
+    },
+    {
+      "id": "n_1787343984116_5rmyu",
+      "user_id": "u1",
+      "message": "تقرير جديد من محمود",
+      "type": "info",
+      "read": 0,
+      "created_at": 1787343984115
+    },
+    {
+      "id": "n_1787343996605_wo1c4",
+      "user_id": "u1",
+      "message": "تقرير جديد من محمود",
+      "type": "info",
+      "read": 0,
+      "created_at": 1787343996603
+    },
+    {
+      "id": "n_1787344253882_unplw",
+      "user_id": "u1",
+      "message": "تقرير جديد من محمود",
+      "type": "info",
+      "read": 0,
+      "created_at": 1787344253882
+    },
+    {
+      "id": "n_1787345727518_ri4vp",
+      "user_id": "u1",
+      "message": "تقرير جديد من محمود",
+      "type": "info",
+      "read": 0,
+      "created_at": 1787345727518
+    }
+  ]
+}

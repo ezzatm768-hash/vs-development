@@ -1,0 +1,14 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" fill="#000000"/>
+  <!-- House outline -->
+  <path d="M 60 180 L 200 60 L 340 180 L 340 320 C 340 335 325 350 310 350 L 90 350 C 75 350 60 335 60 320 L 60 180" fill="none" stroke="white" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Inner line for 3D effect -->
+  <path d="M 200 78 L 325 185 L 325 305 C 325 318 315 330 302 330 L 200 330" fill="none" stroke="white" stroke-width="2.5" opacity="0.9"/>
+  <!-- VS Letters -->
+  <text x="200" y="285" text-anchor="middle" font-family="serif" font-size="165" font-weight="700" fill="white" letter-spacing="-4">VS</text>
+  <!-- DEVELOPMENT text -->
+  <text x="200" y="325" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="white" letter-spacing="4">DEVELOPMENT</text>
+  <!-- Small dots as in original -->
+  <circle cx="118" cy="320" r="3" fill="white" opacity="0.9"/>
+  <circle cx="198" cy="320" r="3" fill="white" opacity="0.9"/>
+</svg>
