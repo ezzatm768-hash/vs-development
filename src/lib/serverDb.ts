@@ -3,6 +3,7 @@ import path from "path";
 import bcrypt from "bcryptjs";
 
 const DATA_PATH = path.join(process.cwd(), "data", "app.db.json");
+const TMP_PATH = path.join("/tmp", "app.db.json");
 
 type DB = {
   users: any[];
@@ -15,6 +16,10 @@ type DB = {
 
 function load(): DB {
   try {
+    // On Vercel, try /tmp first (writable), then data folder
+    if (fs.existsSync(TMP_PATH)) {
+      return JSON.parse(fs.readFileSync(TMP_PATH, "utf-8"));
+    }
     if (fs.existsSync(DATA_PATH)) {
       return JSON.parse(fs.readFileSync(DATA_PATH, "utf-8"));
     }
@@ -23,9 +28,19 @@ function load(): DB {
 }
 
 function save(db: DB) {
-  const dir = path.dirname(DATA_PATH);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(DATA_PATH, JSON.stringify(db, null, 2));
+  const data = JSON.stringify(db, null, 2);
+  // Try primary path, fallback to /tmp on Vercel (read-only filesystem)
+  try {
+    const dir = path.dirname(DATA_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(DATA_PATH, data);
+    // also keep copy in /tmp for next loads
+    try { fs.writeFileSync(TMP_PATH, data); } catch {}
+  } catch {
+    try {
+      fs.writeFileSync(TMP_PATH, data);
+    } catch {}
+  }
 }
 
 let seeded = false;
