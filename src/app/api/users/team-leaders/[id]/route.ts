@@ -3,7 +3,12 @@ import { getDB, persist } from "@/lib/serverDb";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 const JWT_SECRET = process.env.JWT_SECRET || "vs-sales-system-secret-key-2026";
+const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "";
 function auth(req: Request){ const h=req.headers.get("authorization")||""; const t=h.startsWith("Bearer ")?h.slice(7):""; if(!t) return null; try{return jwt.verify(t,JWT_SECRET) as any}catch{return null} }
+async function getConvex(){
+  if(!CONVEX_URL || CONVEX_URL.includes("127.0.0.1")) return null;
+  try{ const { ConvexHttpClient } = await import("convex/browser"); return new ConvexHttpClient(CONVEX_URL); }catch{ return null; }
+}
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }){
   const user:any=auth(req); if(!user) return NextResponse.json({error:"غير مصرح"},{status:401});
@@ -11,6 +16,21 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const { id }=await params;
   const { name, username, password }=await req.json();
   if(!name && !username && !password) return NextResponse.json({error:"لا يوجد ما يتم تعديله"},{status:400});
+  const convex = await getConvex();
+  if(convex){
+    try{
+      const payload:any={ callerId: user.id, id };
+      if(name) payload.name = name;
+      if(username) payload.username = username;
+      if(password) payload.password = await bcrypt.hash(password,10);
+      await convex.mutation("users:updateTeamLeader" as any, payload);
+      return NextResponse.json({message:"تم التعديل"});
+    }catch(e:any){
+      const msg = String(e?.message||"");
+      if(msg.includes("البريد")) return NextResponse.json({error: msg},{status:400});
+      // fallback to file DB
+    }
+  }
   const db=await getDB();
   const idx=db.users.findIndex((u:any)=>u.id===id);
   if(idx===-1) return NextResponse.json({error:"غير موجود"},{status:404});
@@ -37,6 +57,13 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const user:any=auth(req); if(!user) return NextResponse.json({error:"غير مصرح"},{status:401});
   if(user.role!=="admin") return NextResponse.json({error:"Admin فقط"},{status:403});
   const { id }=await params;
+  const convex = await getConvex();
+  if(convex){
+    try{
+      const res:any = await convex.mutation("users:deleteTeamLeader" as any, { callerId: user.id, id });
+      return NextResponse.json({message:"تم الحذف"});
+    }catch(e:any){}
+  }
   const db=await getDB();
   const idx=db.users.findIndex((u:any)=>u.id===id);
   if(idx===-1) return NextResponse.json({error:"غير موجود"},{status:404});

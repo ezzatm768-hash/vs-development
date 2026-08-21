@@ -52,13 +52,23 @@ export const createTeamLeader = mutation({
 });
 
 export const updateTeamLeader = mutation({
-  args: { callerId: v.id("users"), id: v.id("users"), name: v.optional(v.string()), username: v.optional(v.string()) },
+  args: { callerId: v.id("users"), id: v.id("users"), name: v.optional(v.string()), username: v.optional(v.string()), password: v.optional(v.string()) },
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.callerId);
     const patch: any = {};
     if (args.name) patch.name = args.name;
-    if (args.username) patch.username = args.username;
-    await ctx.db.patch(args.id, patch);
+    if (args.username) {
+      const exists = await ctx.db.query("users").withIndex("by_username", (q: any) => q.eq("username", args.username)).unique();
+      if (exists && exists._id !== args.id) throw new Error("البريد موجود مسبقاً");
+      patch.username = args.username;
+    }
+    if (args.password) patch.password = args.password;
+    if (Object.keys(patch).length) await ctx.db.patch(args.id, patch);
+    if (args.name) {
+      const teams = await ctx.db.query("teams").collect();
+      const team = teams.find((t: any) => t.team_leader_id === args.id);
+      if (team) await ctx.db.patch(team._id, { team_name: `فريق ${args.name}` });
+    }
     return args.id;
   },
 });

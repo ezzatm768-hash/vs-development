@@ -3,11 +3,27 @@ import { getDB, persist, uid } from "@/lib/serverDb";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 const JWT_SECRET = process.env.JWT_SECRET || "vs-sales-system-secret-key-2026";
+const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "";
 function auth(req: Request){ const h=req.headers.get("authorization")||""; const t=h.startsWith("Bearer ")?h.slice(7):""; if(!t) return null; try{return jwt.verify(t,JWT_SECRET) as any}catch{return null} }
+
+async function getConvex(){
+  if(!CONVEX_URL || CONVEX_URL.includes("127.0.0.1")) return null;
+  try{ const { ConvexHttpClient } = await import("convex/browser"); return new ConvexHttpClient(CONVEX_URL); }catch{ return null; }
+}
 
 export async function GET(req: Request){
   const user:any=auth(req); if(!user) return NextResponse.json({error:"غير مصرح"},{status:401});
   if(user.role!=="admin") return NextResponse.json({error:"Admin فقط"},{status:403});
+  const convex = await getConvex();
+  if(convex){
+    try{
+      // Use Convex as source of truth when deployed
+      const data:any = await convex.query("users:listTeamLeaders" as any, { callerId: user.id });
+      // map to same shape as file DB for frontend
+      const mapped = data.map((u:any)=>({ id: u._id||u.id, username: u.username, name: u.name, created_at: u.created_at, team_name: u.team_name, team_id: u.team_id, member_count: u.member_count }));
+      return NextResponse.json(mapped);
+    }catch(e:any){ /* fallback to file */ }
+  }
   const db=await getDB();
   const leaders=db.users.filter((u:any)=>u.role==="team_leader").map((u:any)=>{
     const team=db.teams.find((t:any)=>t.team_leader_id===u.id);
@@ -22,6 +38,18 @@ export async function POST(req: Request){
   if(user.role!=="admin") return NextResponse.json({error:"Admin فقط"},{status:403});
   const { username, password, name }=await req.json();
   if(!username||!password||!name) return NextResponse.json({error:"جميع الحقول مطلوبة"},{status:400});
+  const convex = await getConvex();
+  if(convex){
+    try{
+      const hashed=await bcrypt.hash(password,10);
+      const res:any = await convex.mutation("users:createTeamLeader" as any, { callerId: user.id, username, password: hashed, name });
+      return NextResponse.json({ id: res.userId || res.id, message:"تم الإنشاء" });
+    }catch(e:any){
+      const msg = e?.message || "فشل";
+      if(msg.includes("موجود")) return NextResponse.json({error:"اسم المستخدم موجود"},{status:400});
+      // fallback
+    }
+  }
   const db=await getDB();
   if(db.users.find((u:any)=>u.username===username)) return NextResponse.json({error:"اسم المستخدم موجود"},{status:400});
   const hashed=await bcrypt.hash(password,10);
