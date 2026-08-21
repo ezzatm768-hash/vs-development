@@ -49,7 +49,7 @@ export const dashboard = query({
       // enrich reports with sales names
       const enriched = await Promise.all(
         reports.map(async (r) => {
-          const s = await ctx.db.get(r.sales_id);
+          const s: any = await ctx.db.get(r.sales_id);
           return { ...r, sales_name: s?.name || "" };
         })
       );
