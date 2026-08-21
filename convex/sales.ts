@@ -18,13 +18,13 @@ export const list = query({
       let team = teamId ? await ctx.db.get(teamId) : null;
       if (!team) {
         const teams = await ctx.db.query("teams").collect();
-        team = teams.find((t) => t.team_leader_id === caller._id) || null;
+        team = teams.find((t: any) => t.team_leader_id === caller._id) || null;
       }
       if (!team) return [];
-      sales = sales.filter((s) => s.team_id === team._id);
+      sales = sales.filter((s: any) => s.team_id === team._id);
     }
     const enriched = await Promise.all(
-      sales.map(async (s) => {
+      sales.map(async (s: any) => {
         const team = await ctx.db.get(s.team_id);
         let leaderName = "";
         if (team?.team_leader_id) {
@@ -46,10 +46,10 @@ export const myTeam = query({
     let team = caller.team_id ? await ctx.db.get(caller.team_id) : null;
     if (!team) {
       const teams = await ctx.db.query("teams").collect();
-      team = teams.find((t) => t.team_leader_id === caller._id) || null;
+      team = teams.find((t: any) => t.team_leader_id === caller._id) || null;
     }
     if (!team) return { team: null, members: [] };
-    const members = await ctx.db.query("sales").withIndex("by_team", (q) => q.eq("team_id", team!._id as any)).collect();
+    const members = await ctx.db.query("sales").withIndex("by_team", (q: any) => q.eq("team_id", team!._id as any)).collect();
     return { team, members: members.sort((a, b) => a.name.localeCompare(b.name, "ar")) };
   },
 });
@@ -75,7 +75,7 @@ export const create = mutation({
       created_at: Date.now(),
     });
     // auto-create draft evaluation for active period
-    const activePeriod = await ctx.db.query("evaluation_periods").withIndex("by_status", (q) => q.eq("status", "active")).first();
+    const activePeriod = await ctx.db.query("evaluation_periods").withIndex("by_status", (q: any) => q.eq("status", "active")).first();
     if (activePeriod) {
       await ctx.db.insert("evaluations", {
         sales_id: id,
@@ -101,7 +101,7 @@ export const update = mutation({
       let team = caller.team_id ? await ctx.db.get(caller.team_id) : null;
       if (!team) {
         const teams = await ctx.db.query("teams").collect();
-        team = teams.find((t) => t.team_leader_id === caller._id) || null;
+        team = teams.find((t: any) => t.team_leader_id === caller._id) || null;
       }
       if (!team || sales.team_id !== team._id) throw new Error("ليس ضمن فريقك");
     }
@@ -124,11 +124,11 @@ export const remove = mutation({
       let team = caller.team_id ? await ctx.db.get(caller.team_id) : null;
       if (!team) {
         const teams = await ctx.db.query("teams").collect();
-        team = teams.find((t) => t.team_leader_id === caller._id) || null;
+        team = teams.find((t: any) => t.team_leader_id === caller._id) || null;
       }
       if (!team || sales.team_id !== team._id) throw new Error("ليس ضمن فريقك");
     }
-    const evals = await ctx.db.query("evaluations").withIndex("by_sales", (q) => q.eq("sales_id", args.id)).collect();
+    const evals = await ctx.db.query("evaluations").withIndex("by_sales", (q: any) => q.eq("sales_id", args.id)).collect();
     for (const e of evals) await ctx.db.delete(e._id);
     await ctx.db.delete(args.id);
     return { deleted: true };

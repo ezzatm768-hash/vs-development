@@ -23,17 +23,17 @@ export const list = query({
 
     // RBAC: Team Leader sees only his team
     if (caller.role === "team_leader") {
-      evals = evals.filter((e) => e.team_leader_id === caller._id);
+      evals = evals.filter((e: any) => e.team_leader_id === caller._id);
     } else if (args.team_leader_id) {
-      evals = evals.filter((e) => e.team_leader_id === args.team_leader_id);
+      evals = evals.filter((e: any) => e.team_leader_id === args.team_leader_id);
     }
 
-    if (args.sales_id) evals = evals.filter((e) => e.sales_id === args.sales_id);
-    if (args.status) evals = evals.filter((e) => e.status === args.status);
+    if (args.sales_id) evals = evals.filter((e: any) => e.sales_id === args.sales_id);
+    if (args.status) evals = evals.filter((e: any) => e.status === args.status);
 
     // enrich with sales & period names
     const enriched = await Promise.all(
-      evals.map(async (e) => {
+      evals.map(async (e: any) => {
         const sales = await ctx.db.get(e.sales_id);
         const leader = await ctx.db.get(e.team_leader_id);
         let periodName = e.evaluation_period || "";
@@ -53,7 +53,7 @@ export const list = query({
     if (args.search) {
       const s = args.search.toLowerCase();
       return enriched.filter(
-        (e) => e.sales_name.toLowerCase().includes(s) || e.team_leader_name.toLowerCase().includes(s)
+        (e: any) => e.sales_name.toLowerCase().includes(s) || e.team_leader_name.toLowerCase().includes(s)
       );
     }
 
@@ -152,7 +152,7 @@ export const createOrUpdate = mutation({
     if (args.evaluation_period_id) {
       const dup = await ctx.db
         .query("evaluations")
-        .withIndex("by_sales_period", (q) => q.eq("sales_id", args.sales_id).eq("evaluation_period_id", args.evaluation_period_id!))
+        .withIndex("by_sales_period", (q: any) => q.eq("sales_id", args.sales_id).eq("evaluation_period_id", args.evaluation_period_id!))
         .first();
       if (dup) {
         await ctx.db.patch(dup._id, {
@@ -199,7 +199,7 @@ export const createOrUpdate = mutation({
 
     // Notify admin (first admin)
     if (args.status === "submitted") {
-      const admins = await ctx.db.query("users").withIndex("by_role", (q) => q.eq("role", "admin")).collect();
+      const admins = await ctx.db.query("users").withIndex("by_role", (q: any) => q.eq("role", "admin")).collect();
       for (const a of admins) {
         await ctx.db.insert("notifications", {
           user_id: a._id,
@@ -256,7 +256,7 @@ export const employeeHistory = query({
       const team = await ctx.db.get(sales.team_id);
       if (!team || team.team_leader_id !== caller._id) throw new Error("غير مصرح");
     }
-    const evals = await ctx.db.query("evaluations").withIndex("by_sales", (q) => q.eq("sales_id", args.salesId)).collect();
+    const evals = await ctx.db.query("evaluations").withIndex("by_sales", (q: any) => q.eq("sales_id", args.salesId)).collect();
     return evals.sort((a, b) => b.created_at - a.created_at);
   },
 });

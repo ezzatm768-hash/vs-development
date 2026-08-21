@@ -15,7 +15,7 @@ export const active = query({
   handler: async (ctx, args) => {
     const caller = await ctx.db.get(args.callerId);
     if (!caller) throw new Error("غير مصرح");
-    return await ctx.db.query("evaluation_periods").withIndex("by_status", (q) => q.eq("status", "active")).first();
+    return await ctx.db.query("evaluation_periods").withIndex("by_status", (q: any) => q.eq("status", "active")).first();
   },
 });
 
@@ -34,7 +34,7 @@ export const create = mutation({
     });
     // create draft evaluations for all active sales
     const salesList = await ctx.db.query("sales").collect();
-    const activeSales = salesList.filter((s) => s.status === "active" || !s.status);
+    const activeSales = salesList.filter((s: any) => s.status === "active" || !s.status);
     for (const sale of activeSales) {
       const team = await ctx.db.get(sale.team_id);
       if (team?.team_leader_id) {
@@ -50,7 +50,7 @@ export const create = mutation({
       }
     }
     // notify leaders
-    const leaders = (await ctx.db.query("users").collect()).filter((u) => u.role === "team_leader");
+    const leaders = (await ctx.db.query("users").collect()).filter((u: any) => u.role === "team_leader");
     for (const l of leaders) {
       await ctx.db.insert("notifications", { user_id: l._id, message: `فترة تقييم جديدة بدأت: ${args.name}`, type: "info", read: 0, created_at: Date.now() });
     }

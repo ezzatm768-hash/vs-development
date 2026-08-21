@@ -8,9 +8,9 @@ export const list = query({
     if (!caller || caller.role !== "admin") throw new Error("Admin فقط");
     const teams = await ctx.db.query("teams").collect();
     const enriched = await Promise.all(
-      teams.map(async (t) => {
+      teams.map(async (t: any) => {
         const leader = t.team_leader_id ? await ctx.db.get(t.team_leader_id) : null;
-        const count = (await ctx.db.query("sales").withIndex("by_team", (q) => q.eq("team_id", t._id)).collect()).length;
+        const count = (await ctx.db.query("sales").withIndex("by_team", (q: any) => q.eq("team_id", t._id)).collect()).length;
         return { ...t, leader_name: leader?.name || "", member_count: count };
       })
     );
@@ -27,28 +27,28 @@ export const dashboard = query({
       let team = caller.team_id ? await ctx.db.get(caller.team_id) : null;
       if (!team) {
         const teams = await ctx.db.query("teams").collect();
-        team = teams.find((t) => t.team_leader_id === caller._id) || null;
+        team = teams.find((t: any) => t.team_leader_id === caller._id) || null;
       }
       if (!team) return { team: null, members: [], stats: {}, activePeriod: null, reports: [] };
-      const members = await ctx.db.query("sales").withIndex("by_team", (q) => q.eq("team_id", team!._id as any)).collect();
-      const activePeriod = await ctx.db.query("evaluation_periods").withIndex("by_status", (q) => q.eq("status", "active")).first();
+      const members = await ctx.db.query("sales").withIndex("by_team", (q: any) => q.eq("team_id", team!._id as any)).collect();
+      const activePeriod = await ctx.db.query("evaluation_periods").withIndex("by_status", (q: any) => q.eq("status", "active")).first();
       let stats = { totalMembers: members.length, requiredReports: 0, completedReports: 0, pendingReports: 0, submittedReports: 0 };
       let reports: any[] = [];
       if (activePeriod) {
         const allEvals = await ctx.db.query("evaluations").collect();
-        const mine = allEvals.filter((e) => e.team_leader_id === caller._id && e.evaluation_period_id === activePeriod._id);
+        const mine = allEvals.filter((e: any) => e.team_leader_id === caller._id && e.evaluation_period_id === activePeriod._id);
         stats.requiredReports = members.length;
-        stats.completedReports = mine.filter((e) => e.status === "reviewed").length;
-        stats.submittedReports = mine.filter((e) => e.status === "submitted").length;
+        stats.completedReports = mine.filter((e: any) => e.status === "reviewed").length;
+        stats.submittedReports = mine.filter((e: any) => e.status === "submitted").length;
         stats.pendingReports = stats.requiredReports - stats.completedReports - stats.submittedReports;
         if (stats.pendingReports < 0) stats.pendingReports = 0;
         reports = mine;
       } else {
-        reports = await ctx.db.query("evaluations").withIndex("by_leader", (q) => q.eq("team_leader_id", caller._id)).collect();
+        reports = await ctx.db.query("evaluations").withIndex("by_leader", (q: any) => q.eq("team_leader_id", caller._id)).collect();
       }
       // enrich reports with sales names
       const enriched = await Promise.all(
-        reports.map(async (r) => {
+        reports.map(async (r: any) => {
           const s: any = await ctx.db.get(r.sales_id);
           return { ...r, sales_name: s?.name || "" };
         })

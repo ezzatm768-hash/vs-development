@@ -10,7 +10,7 @@ export const login = mutation({
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
-      .withIndex("by_username", (q) => q.eq("username", args.username))
+      .withIndex("by_username", (q: any) => q.eq("username", args.username))
       .unique();
     if (!user) throw new Error("بيانات الدخول غير صحيحة");
     // password comparison will be done client-side via API route that uses bcrypt,
