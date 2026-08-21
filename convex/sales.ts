@@ -49,7 +49,7 @@ export const myTeam = query({
       team = teams.find((t) => t.team_leader_id === caller._id) || null;
     }
     if (!team) return { team: null, members: [] };
-    const members = await ctx.db.query("sales").withIndex("by_team", (q) => q.eq("team_id", team!._id)).collect();
+    const members = await ctx.db.query("sales").withIndex("by_team", (q) => q.eq("team_id", team!._id as any)).collect();
     return { team, members: members.sort((a, b) => a.name.localeCompare(b.name, "ar")) };
   },
 });

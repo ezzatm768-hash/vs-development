@@ -30,7 +30,7 @@ export const dashboard = query({
         team = teams.find((t) => t.team_leader_id === caller._id) || null;
       }
       if (!team) return { team: null, members: [], stats: {}, activePeriod: null, reports: [] };
-      const members = await ctx.db.query("sales").withIndex("by_team", (q) => q.eq("team_id", team!._id)).collect();
+      const members = await ctx.db.query("sales").withIndex("by_team", (q) => q.eq("team_id", team!._id as any)).collect();
       const activePeriod = await ctx.db.query("evaluation_periods").withIndex("by_status", (q) => q.eq("status", "active")).first();
       let stats = { totalMembers: members.length, requiredReports: 0, completedReports: 0, pendingReports: 0, submittedReports: 0 };
       let reports: any[] = [];
