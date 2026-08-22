@@ -21,7 +21,7 @@ export async function GET(req: Request){
   if(convex){
     try{
       const callerId = await getConvexCallerId(convex, user);
-      if(callerId){ const data:any = await convex.query("sales:list" as any, { callerId }); return NextResponse.json(data); }
+      if(callerId){ const data:any = await convex.query("sales:list" as any, { callerId }); const mapped = data.map((s:any)=>({ ...s, id: s._id, _id: s._id })); return NextResponse.json(mapped); }
     }catch(e: any){ /* fallback */ }
   }
   const db=await getDB();
