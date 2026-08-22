@@ -9,6 +9,12 @@ async function getConvex(){
   if(!CONVEX_URL || CONVEX_URL.includes("127.0.0.1")) return null;
   try{ const { ConvexHttpClient } = await import("convex/browser"); return new ConvexHttpClient(CONVEX_URL); }catch{ return null; }
 }
+function isConvexId(id:string){ return id && !id.startsWith("u") && id.length>10; }
+async function getConvexCallerId(convex:any, user:any){
+  if(isConvexId(user.id)) return user.id;
+  try{ const u:any = await convex.query("auth:getUserByUsername" as any, { username: user.username }); if(u?._id) return u._id; }catch{}
+  return null;
+}
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }){
   const user:any=auth(req); if(!user) return NextResponse.json({error:"غير مصرح"},{status:401});
@@ -19,12 +25,15 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const convex = await getConvex();
   if(convex){
     try{
-      const payload:any={ callerId: user.id, id };
-      if(name) payload.name = name;
-      if(username) payload.username = username;
-      if(password) payload.password = await bcrypt.hash(password,10);
-      await convex.mutation("users:updateTeamLeader" as any, payload);
-      return NextResponse.json({message:"تم التعديل"});
+      const callerId = await getConvexCallerId(convex, user);
+      if(callerId){
+        const payload:any={ callerId, id };
+        if(name) payload.name = name;
+        if(username) payload.username = username;
+        if(password) payload.password = await bcrypt.hash(password,10);
+        await convex.mutation("users:updateTeamLeader" as any, payload);
+        return NextResponse.json({message:"تم التعديل"});
+      }
     }catch(e:any){
       const msg = String(e?.message||"");
       if(msg.includes("البريد")) return NextResponse.json({error: msg},{status:400});
@@ -60,8 +69,11 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const convex = await getConvex();
   if(convex){
     try{
-      const res:any = await convex.mutation("users:deleteTeamLeader" as any, { callerId: user.id, id });
-      return NextResponse.json({message:"تم الحذف"});
+      const callerId = await getConvexCallerId(convex, user);
+      if(callerId){
+        const res:any = await convex.mutation("users:deleteTeamLeader" as any, { callerId, id });
+        return NextResponse.json({message:"تم الحذف"});
+      }
     }catch(e:any){}
   }
   const db=await getDB();
