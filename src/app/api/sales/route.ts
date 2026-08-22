@@ -2,10 +2,23 @@ import { NextResponse } from "next/server";
 import { getDB, persist, uid } from "@/lib/serverDb";
 import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET || "vs-sales-system-secret-key-2026";
+const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "";
 function auth(req: Request){ const h=req.headers.get("authorization")||""; const t=h.startsWith("Bearer ")?h.slice(7):""; if(!t) return null; try{return jwt.verify(t,JWT_SECRET) as any}catch{return null} }
+async function getConvex(){
+  if(!CONVEX_URL || CONVEX_URL.includes("127.0.0.1")) return null;
+  try{ const { ConvexHttpClient } = await import("convex/browser"); return new ConvexHttpClient(CONVEX_URL); }catch{ return null; }
+}
+function isConvexId(id:string){ return id && !id.startsWith("u") && id.length>10; }
 
 export async function GET(req: Request){
   const user:any=auth(req); if(!user) return NextResponse.json({error:"غير مصرح"},{status:401});
+  const convex = await getConvex();
+  if(convex && isConvexId(user.id)){
+    try{
+      const data:any = await convex.query("sales:list" as any, { callerId: user.id });
+      return NextResponse.json(data);
+    }catch(e){ /* fallback */ }
+  }
   const db=await getDB();
   let sales=db.sales;
   if(user.role==="team_leader"){
@@ -27,6 +40,13 @@ export async function POST(req: Request){
   if(user.role!=="team_leader" && user.role!=="admin") return NextResponse.json({error:"غير مصرح"},{status:403});
   const { name, phone, join_date, team_id }=await req.json();
   if(!name || name.trim().length < 2) return NextResponse.json({error:"الاسم يجب أن يكون حرفين على الأقل"},{status:400});
+  const convex = await getConvex();
+  if(convex && isConvexId(user.id)){
+    try{
+      const id:any = await convex.mutation("sales:create" as any, { callerId: user.id, name: name.trim(), phone: phone||"", join_date: join_date||"" });
+      return NextResponse.json({ id, message:"تمت الإضافة" });
+    }catch(e:any){ const m=String(e?.message||""); if(m.includes("موجود")) return NextResponse.json({error:m},{status:400}); }
+  }
   const db=await getDB();
   let teamId=team_id || user.team_id;
   if(!teamId){
@@ -35,7 +55,6 @@ export async function POST(req: Request){
     if(!t) return NextResponse.json({error:"لا يوجد فريق"},{status:400});
     teamId=t.id;
   }
-  // منع التكرار داخل نفس الفريق
   const duplicate = db.sales.find((s:any)=> s.team_id===teamId && s.name.trim().toLowerCase() === name.trim().toLowerCase());
   if(duplicate) return NextResponse.json({error:"هذا الاسم موجود بالفعل في فريقك"},{status:400});
   const id=uid("s");
