@@ -47,7 +47,7 @@ export default function ReportDetail() {
       <div className="flex items-center justify-between gap-3 no-print">
         <Button variant="ghost" onClick={() => history.back()}>رجوع</Button>
         <div className="flex gap-2">
-          <Button onClick={() => document.getElementById('report-full')?.scrollIntoView({ behavior:'smooth' })}>عرض التقرير بالكامل</Button>
+          <Button onClick={() => window.open(window.location.href, '_blank')}>عرض التقرير بالكامل</Button>
           <Button variant="ghost" onClick={() => window.print()}>طباعة التقرير (A4)</Button>
         </div>
       </div>
