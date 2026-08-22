@@ -46,7 +46,6 @@ export default function TeamPage() {
   };
 
   const del = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف الموظف؟ سيتم حذف تقييماته أيضاً.")) return;
     await fetch(`/api/sales/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token()}` } });
     load();
   };

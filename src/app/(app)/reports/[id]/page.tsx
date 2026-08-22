@@ -35,7 +35,6 @@ export default function ReportDetail() {
   }, [id]);
 
   const updateStatus = async () => {
-    if (!confirm(`تأكيد تغيير الحالة إلى ${statusAction === "reviewed" ? "مكتمل" : "مُعاد"}؟`)) return;
     const res = await fetch(`/api/evaluations/${id}/status`, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` }, body: JSON.stringify({ status: statusAction, admin_notes: adminNotes }) });
     if (res.ok) { alert("تم التحديث"); location.reload(); } else { const e = await res.json(); alert(e.error || "فشل"); }
   };

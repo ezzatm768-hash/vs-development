@@ -58,7 +58,6 @@ export default function EvaluationsPage() {
     if(status==="submitted"){
       const hasContent = Object.values(form).some((v:any)=> typeof v==="string" && v.trim().length>0);
       if(!hasContent){ showToast("اكتب تقييم كتابي قبل الإرسال","error"); return; }
-      if (!confirm("هل أنت متأكد من إرسال التقييم؟")) return;
     }
     setSaving(true);
     const payload: any = { ...form, sales_id: selectedSales, evaluation_period: activePeriod?.name, evaluation_period_id: activePeriod?.id, status, existingId: existingId || undefined };

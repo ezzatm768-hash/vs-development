@@ -57,7 +57,6 @@ export default function TeamLeadersPage() {
     setAdding(false);
   };
   const del = async (id: string) => {
-    if (!confirm("هل أنت متأكد من الحذف؟ سيتم حذف الفريق والمبيعات والتقييمات التابعة له.")) return;
     const res = await fetch(`/api/users/team-leaders/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token()}` } });
     const d = await res.json().catch(()=>({}));
     if(res.ok){ showToast("تم الحذف"); load(); } else showToast(d.error||"فشل الحذف","error");
