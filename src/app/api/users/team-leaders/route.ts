@@ -10,6 +10,12 @@ async function getConvex(){
   if(!CONVEX_URL || CONVEX_URL.includes("127.0.0.1")) return null;
   try{ const { ConvexHttpClient } = await import("convex/browser"); return new ConvexHttpClient(CONVEX_URL); }catch{ return null; }
 }
+function isConvexId(id:string){ return id && !id.startsWith("u") && id.length>10; }
+async function getConvexCallerId(convex:any, user:any){
+  if(isConvexId(user.id)) return user.id;
+  try{ const u:any = await convex.query("auth:getUserByUsername" as any, { username: user.username }); if(u?._id) return u._id; }catch{}
+  return null;
+}
 
 export async function GET(req: Request){
   const user:any=auth(req); if(!user) return NextResponse.json({error:"غير مصرح"},{status:401});
@@ -17,11 +23,12 @@ export async function GET(req: Request){
   const convex = await getConvex();
   if(convex){
     try{
-      // Use Convex as source of truth when deployed
-      const data:any = await convex.query("users:listTeamLeaders" as any, { callerId: user.id });
-      // map to same shape as file DB for frontend
-      const mapped = data.map((u:any)=>({ id: u._id||u.id, username: u.username, name: u.name, created_at: u.created_at, team_name: u.team_name, team_id: u.team_id, member_count: u.member_count }));
-      return NextResponse.json(mapped);
+      const callerId = await getConvexCallerId(convex, user);
+      if(callerId){
+        const data:any = await convex.query("users:listTeamLeaders" as any, { callerId });
+        const mapped = data.map((u:any)=>({ id: u._id||u.id, username: u.username, name: u.name, created_at: u.created_at, team_name: u.team_name, team_id: u.team_id, member_count: u.member_count }));
+        return NextResponse.json(mapped);
+      }
     }catch(e:any){ /* fallback to file */ }
   }
   const db=await getDB();
@@ -41,9 +48,12 @@ export async function POST(req: Request){
   const convex = await getConvex();
   if(convex){
     try{
-      const hashed=await bcrypt.hash(password,10);
-      const res:any = await convex.mutation("users:createTeamLeader" as any, { callerId: user.id, username, password: hashed, name });
-      return NextResponse.json({ id: res.userId || res.id, message:"تم الإنشاء" });
+      const callerId = await getConvexCallerId(convex, user);
+      if(callerId){
+        const hashed=await bcrypt.hash(password,10);
+        const res:any = await convex.mutation("users:createTeamLeader" as any, { callerId, username, password: hashed, name });
+        return NextResponse.json({ id: res.userId || res.id, message:"تم الإنشاء" });
+      }
     }catch(e:any){
       const msg = e?.message || "فشل";
       if(msg.includes("موجود")) return NextResponse.json({error:"اسم المستخدم موجود"},{status:400});

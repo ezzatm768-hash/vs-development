@@ -15,18 +15,22 @@ async function getConvex(){
   try{ const { ConvexHttpClient } = await import("convex/browser"); return new ConvexHttpClient(CONVEX_URL); }catch{ return null; }
 }
 function isConvexId(id:string){ return id && !id.startsWith("u") && id.length>10; }
+async function getConvexCallerId(convex: any, user: any){ if(isConvexId(user.id)) return user.id; try{ const u = await convex.query("auth:getUserByUsername" as any, { username: user.username }); if(u?._id) return u._id; }catch{} return null; }
 
 export async function GET(req: Request) {
   const user: any = auth(req);
   if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   const convex = await getConvex();
-  if(convex && isConvexId(user.id)){
+  if(convex){
     try{
-      const url = new URL(req.url);
-      const search = url.searchParams.get("search") || undefined;
-      const status = url.searchParams.get("status") || undefined;
-      const data:any = await convex.query("evaluations:list" as any, { callerId: user.id, search, status });
-      return NextResponse.json(data);
+      const callerId = await getConvexCallerId(convex, user);
+      if(callerId){
+        const url = new URL(req.url);
+        const search = url.searchParams.get("search") || undefined;
+        const status = url.searchParams.get("status") || undefined;
+        const data = await convex.query("evaluations:list" as any, { callerId, search, status });
+        return NextResponse.json(data);
+      }
     }catch{}
   }
   const db = await getDB();
@@ -56,15 +60,18 @@ export async function POST(req: Request) {
   if (!sales_id) return NextResponse.json({ error: "sales_id مطلوب" }, { status: 400 });
 
   const convex = await getConvex();
-  if(convex && isConvexId(user.id)){
+  if(convex){
     try{
-      const id:any = await convex.mutation("evaluations:createOrUpdate" as any, {
-        callerId: user.id, sales_id, evaluation_period, evaluation_period_id,
-        product_knowledge, communication, needs_discovery, sales_process, crm_discipline, follow_up_activity,
-        strengths, weaknesses, main_problem, employee_status, final_notes, status: status||"draft", existingId: existingId||undefined
-      });
-      return NextResponse.json({ id, message:"تم الحفظ" });
-    }catch(e:any){ return NextResponse.json({error:String(e?.message||"فشل")},{status:400}); }
+      const callerId = await getConvexCallerId(convex, user);
+      if(callerId){
+        const id = await convex.mutation("evaluations:createOrUpdate" as any, {
+          callerId, sales_id, evaluation_period, evaluation_period_id,
+          product_knowledge, communication, needs_discovery, sales_process, crm_discipline, follow_up_activity,
+          strengths, weaknesses, main_problem, employee_status, final_notes, status: status||"draft", existingId: existingId||undefined
+        });
+        return NextResponse.json({ id, message:"تم الحفظ" });
+      }
+    }catch(e: any){ return NextResponse.json({error:String(e?.message||"فشل")},{status:400}); }
   }
 
   const db = await getDB();

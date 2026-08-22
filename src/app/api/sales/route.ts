@@ -9,15 +9,20 @@ async function getConvex(){
   try{ const { ConvexHttpClient } = await import("convex/browser"); return new ConvexHttpClient(CONVEX_URL); }catch{ return null; }
 }
 function isConvexId(id:string){ return id && !id.startsWith("u") && id.length>10; }
+async function getConvexCallerId(convex:any, user:any){
+  if(isConvexId(user.id)) return user.id;
+  try{ const u:any = await convex.query("auth:getUserByUsername" as any, { username: user.username }); if(u?._id) return u._id; }catch{}
+  return null;
+}
 
 export async function GET(req: Request){
   const user:any=auth(req); if(!user) return NextResponse.json({error:"غير مصرح"},{status:401});
   const convex = await getConvex();
-  if(convex && isConvexId(user.id)){
+  if(convex){
     try{
-      const data:any = await convex.query("sales:list" as any, { callerId: user.id });
-      return NextResponse.json(data);
-    }catch(e){ /* fallback */ }
+      const callerId = await getConvexCallerId(convex, user);
+      if(callerId){ const data:any = await convex.query("sales:list" as any, { callerId }); return NextResponse.json(data); }
+    }catch(e: any){ /* fallback */ }
   }
   const db=await getDB();
   let sales=db.sales;
@@ -41,10 +46,10 @@ export async function POST(req: Request){
   const { name, phone, join_date, team_id }=await req.json();
   if(!name || name.trim().length < 2) return NextResponse.json({error:"الاسم يجب أن يكون حرفين على الأقل"},{status:400});
   const convex = await getConvex();
-  if(convex && isConvexId(user.id)){
+  if(convex){
     try{
-      const id:any = await convex.mutation("sales:create" as any, { callerId: user.id, name: name.trim(), phone: phone||"", join_date: join_date||"" });
-      return NextResponse.json({ id, message:"تمت الإضافة" });
+      const callerId = await getConvexCallerId(convex, user);
+      if(callerId){ const id:any = await convex.mutation("sales:create" as any, { callerId, name: name.trim(), phone: phone||"", join_date: join_date||"" }); return NextResponse.json({ id, message:"تمت الإضافة" }); }
     }catch(e:any){ const m=String(e?.message||""); if(m.includes("موجود")) return NextResponse.json({error:m},{status:400}); }
   }
   const db=await getDB();

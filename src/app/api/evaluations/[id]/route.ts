@@ -6,16 +6,17 @@ const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "";
 function auth(req: Request){ const h=req.headers.get("authorization")||""; const t=h.startsWith("Bearer ")?h.slice(7):""; if(!t) return null; try{return jwt.verify(t,JWT_SECRET) as any}catch{return null} }
 async function getConvex(){ if(!CONVEX_URL || CONVEX_URL.includes("127.0.0.1")) return null; try{ const { ConvexHttpClient } = await import("convex/browser"); return new ConvexHttpClient(CONVEX_URL); }catch{ return null; } }
 function isConvexId(id:string){ return id && !id.startsWith("u") && id.length>10; }
+async function getConvexCallerId(convex: any, user: any){ if(isConvexId(user.id)) return user.id; try{ const u = await convex.query("auth:getUserByUsername" as any, { username: user.username }); if(u?._id) return u._id; }catch{} return null; }
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }){
   const user:any=auth(req); if(!user) return NextResponse.json({error:"غير مصرح"},{status:401});
   const { id }=await params;
   const convex = await getConvex();
-  if(convex && isConvexId(user.id)){
+  if(convex){
     try{
-      const data:any = await convex.query("evaluations:getById" as any, { callerId: user.id, id });
-      return NextResponse.json(data);
-    }catch(e:any){ return NextResponse.json({error:String(e?.message||"غير موجود")},{status:404}); }
+      const callerId = await getConvexCallerId(convex, user);
+      if(callerId){ const data = await convex.query("evaluations:getById" as any, { callerId, id }); return NextResponse.json(data); }
+    }catch(e: any){ return NextResponse.json({error:String(e?.message||"غير موجود")},{status:404}); }
   }
   const db=await getDB();
   const ev=db.evaluations.find((e:any)=>e.id===id);

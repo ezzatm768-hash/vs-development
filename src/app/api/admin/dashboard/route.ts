@@ -6,17 +6,19 @@ const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "";
 function auth(req: Request){ const h=req.headers.get("authorization")||""; const t=h.startsWith("Bearer ")?h.slice(7):""; if(!t) return null; try{return jwt.verify(t,JWT_SECRET) as any}catch{return null} }
 async function getConvex(){ if(!CONVEX_URL || CONVEX_URL.includes("127.0.0.1")) return null; try{ const { ConvexHttpClient } = await import("convex/browser"); return new ConvexHttpClient(CONVEX_URL); }catch{ return null; } }
 function isConvexId(id:string){ return id && !id.startsWith("u") && id.length>10; }
+async function getConvexCallerId(convex: any, user: any){ if(isConvexId(user.id)) return user.id; try{ const u = await convex.query("auth:getUserByUsername" as any, { username: user.username }); if(u?._id) return u._id; }catch{} return null; }
 
 export async function GET(req: Request){
   const user:any=auth(req); if(!user) return NextResponse.json({error:"غير مصرح"},{status:401});
   if(user.role!=="admin") return NextResponse.json({error:"Admin فقط"},{status:403});
   const convex = await getConvex();
-  if(convex && isConvexId(user.id)){
+  if(convex){
     try{
-      const stats:any = await convex.query("users:dashboardStats" as any, { callerId: user.id });
-      // Also fetch sales and evaluations for salesTable via convex
-      const sales:any = await convex.query("sales:list" as any, { callerId: user.id });
-      const evals:any = await convex.query("evaluations:list" as any, { callerId: user.id });
+      const callerId = await getConvexCallerId(convex, user);
+      if(!callerId) throw new Error("no caller");
+      const stats = await convex.query("users:dashboardStats" as any, { callerId });
+      const sales = await convex.query("sales:list" as any, { callerId });
+      const evals = await convex.query("evaluations:list" as any, { callerId });
       // Build salesTable similar to file logic but using convex data
       const salesTable = sales.map((s:any)=>{
         const evalsForSales = evals.filter((e:any)=> (e.sales_id===s._id || e.sales_id===s.id)).sort((a:any,b:any)=> (b.updated_at||0)-(a.updated_at||0));
@@ -35,7 +37,7 @@ export async function GET(req: Request){
       const hasProblems = salesTable.filter((s:any)=>s.hasProblem).length;
       const recentEvaluations = evals.slice().sort((a:any,b:any)=>b.updated_at-a.updated_at).slice(0,5).map((e:any)=>{ const s=sales.find((x:any)=>x._id===e.sales_id||x.id===e.sales_id); return {...e, sales_name:s?.name||"", team_name:s?.team_name||"", team_leader_name:s?.team_leader_name||""}; });
       return NextResponse.json({ totalTeamLeaders: stats.totalTeamLeaders, totalSales: sales.length, completedReports: stats.completedReports, pendingReports: stats.pendingReports, submittedReports: stats.submittedReports, activeTeams: stats.activeTeams, reportsByTeamLeader: stats.reportsByTeamLeader, salesTable, evaluated, notEvaluated, needsFollowUp, hasProblems, recentEvaluations });
-    }catch(e){ /* fallback */ }
+    }catch(e: any){ /* fallback */ }
   }
   const db=await getDB();
   const totalTeamLeaders=db.users.filter((u:any)=>u.role==="team_leader").length;
