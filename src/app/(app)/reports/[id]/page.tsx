@@ -48,11 +48,12 @@ export default function ReportDetail() {
       <div className="flex items-center justify-between gap-3 no-print">
         <Button variant="ghost" onClick={() => history.back()}>رجوع</Button>
         <div className="flex gap-2">
+          <Button onClick={() => document.getElementById('report-full')?.scrollIntoView({ behavior:'smooth' })}>عرض التقرير بالكامل</Button>
           <Button variant="ghost" onClick={() => window.print()}>طباعة التقرير (A4)</Button>
         </div>
       </div>
 
-      <Card className="print-card overflow-hidden">
+      <Card id="report-full" className="print-card overflow-hidden">
         <div className="bg-gradient-to-r from-slate-900 to-sky-700 text-white p-6">
           <h1 className="text-xl font-black">تقرير تقييم الموظف</h1>
           <p className="text-white/80 text-sm mt-1">{data.evaluation_period} • {new Date(data.updated_at).toLocaleDateString("ar-EG")}</p>

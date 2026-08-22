@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
 
-export function Card({ children, className = "", style }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
-  return <div style={style} className={`bg-white rounded-2xl border border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.05)] ${className}`}>{children}</div>;
+export function Card({ children, className = "", style, id }: { children: React.ReactNode; className?: string; style?: React.CSSProperties; id?: string }) {
+  return <div id={id} style={style} className={`bg-white rounded-2xl border border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.05)] ${className}`}>{children}</div>;
 }
 export function CardHeader({ title, desc, action }: { title: string; desc?: string; action?: React.ReactNode }) {
   return (
