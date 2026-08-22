@@ -36,7 +36,7 @@ export const dashboard = query({
       let reports: any[] = [];
       if (activePeriod) {
         const allEvals = await ctx.db.query("evaluations").collect();
-        const mine = allEvals.filter((e: any) => e.team_leader_id === caller._id && e.evaluation_period_id === activePeriod._id);
+        const mine = allEvals.filter((e: any) => e.team_leader_id === caller._id && (e.evaluation_period_id === activePeriod._id || e.evaluation_period === activePeriod.name));
         stats.requiredReports = members.length;
         stats.completedReports = mine.filter((e: any) => e.status === "reviewed").length;
         stats.submittedReports = mine.filter((e: any) => e.status === "submitted").length;

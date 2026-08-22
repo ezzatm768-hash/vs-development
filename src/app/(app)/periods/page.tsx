@@ -63,7 +63,7 @@ export default function PeriodsPage() {
             <h3 className="font-bold">فترة جديدة</h3>
             <div><label className="text-sm font-medium">الاسم</label><Input value={form.name} onChange={(e: any) => setForm({ ...form, name: e.target.value })} placeholder="2026-03" required /></div>
             <div className="grid grid-cols-2 gap-3"><div><label className="text-sm font-medium">من</label><Input type="date" value={form.start_date} onChange={(e: any) => setForm({ ...form, start_date: e.target.value })} /></div><div><label className="text-sm font-medium">إلى</label><Input type="date" value={form.end_date} onChange={(e: any) => setForm({ ...form, end_date: e.target.value })} /></div></div>
-            <div><label className="text-sm font-medium">النوع</label><Select value={form.period_type} onChange={(e: any) => setForm({ ...form, period_type: e.target.value })}><option value="monthly">شهري</option><option value="quarterly">ربع سنوي</option></Select></div>
+            <div><label className="text-sm font-medium">النوع</label><Select value={form.period_type} onChange={(e: any) => setForm({ ...form, period_type: e.target.value })}><option value="weekly">أسبوعي</option><option value="monthly">شهري</option><option value="quarterly">ربع سنوي</option></Select></div>
             <div className="flex gap-2 justify-end"><Button variant="ghost" type="button" onClick={() => setShow(false)}>إلغاء</Button><Button type="submit">إنشاء</Button></div>
           </form>
         </div>
