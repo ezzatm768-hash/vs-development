@@ -36,7 +36,7 @@ export async function GET(req: Request){
       const notEvaluated = salesTable.filter((s:any)=>s.statusLabel==="لم يتم التقييم").length;
       const needsFollowUp = salesTable.filter((s:any)=>s.needsFollowUp).length;
       const hasProblems = salesTable.filter((s:any)=>s.hasProblem).length;
-      const recentEvaluations = evals.slice().sort((a:any,b:any)=>b.updated_at-a.updated_at).slice(0,5).map((e:any)=>{ const s=sales.find((x:any)=>x._id===e.sales_id||x.id===e.sales_id); return {...e, sales_name:s?.name||"", team_name:s?.team_name||"", team_leader_name:s?.team_leader_name||""}; });
+      const recentEvaluations = evals.slice().sort((a:any,b:any)=>b.updated_at-a.updated_at).slice(0,5).map((e:any)=>{ const s=sales.find((x:any)=>x._id===e.sales_id||x.id===e.sales_id); return {...e, id: e._id, sales_name:s?.name||"", team_name:s?.team_name||"", team_leader_name:s?.team_leader_name||""}; });
       return NextResponse.json({ totalTeamLeaders: stats.totalTeamLeaders, totalSales: sales.length, completedReports: stats.completedReports, pendingReports: stats.pendingReports, submittedReports: stats.submittedReports, activeTeams: stats.activeTeams, reportsByTeamLeader: stats.reportsByTeamLeader, salesTable, evaluated, notEvaluated, needsFollowUp, hasProblems, recentEvaluations });
     }catch(e: any){ /* fallback */ }
   }
