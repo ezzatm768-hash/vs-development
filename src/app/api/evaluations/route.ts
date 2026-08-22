@@ -10,7 +10,7 @@ function auth(req: Request) {
   try { return jwt.verify(token, JWT_SECRET) as any; } catch { return null; }
 }
 async function getConvex(){
-  const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || process.env.CONVEX_URL || "";
+  let CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || process.env.CONVEX_URL || ""; CONVEX_URL = CONVEX_URL.replace(/\/$/, "");
   if(!CONVEX_URL || CONVEX_URL.includes("127.0.0.1")) return null;
   try{ const { ConvexHttpClient } = await import("convex/browser"); return new ConvexHttpClient(CONVEX_URL); }catch{ return null; }
 }

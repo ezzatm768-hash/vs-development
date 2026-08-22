@@ -7,7 +7,7 @@ import { getDB } from "@/lib/serverDb";
 const JWT_SECRET = process.env.JWT_SECRET || "vs-sales-system-secret-key-2026";
 
 async function getUserFromConvex(username: string){
-  const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "";
+  let CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || ""; CONVEX_URL = CONVEX_URL.replace(/\/$/, "");
   if(!CONVEX_URL || CONVEX_URL.includes("127.0.0.1")) return null;
   try{
     const client = new ConvexHttpClient(CONVEX_URL);
