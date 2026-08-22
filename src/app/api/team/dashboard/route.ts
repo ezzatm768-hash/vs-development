@@ -15,7 +15,18 @@ export async function GET(req: Request){
   if(convex){
     try{
       const callerId = await getConvexCallerId(convex, user);
-      if(callerId){ const data = await convex.query("teams:dashboard" as any, { callerId }); return NextResponse.json(data); }
+      if(callerId){
+        const data:any = await convex.query("teams:dashboard" as any, { callerId });
+        const mapped = {
+          team: data.team ? { ...data.team, id: data.team._id } : null,
+          members: (data.members||[]).map((m:any)=>({ ...m, id: m._id, team_id: m.team_id })),
+          reports: (data.reports||[]).map((r:any)=>({ ...r, id: r._id, sales_id: r.sales_id, evaluation_period_id: r.evaluation_period_id })),
+          recentReports: (data.recentReports||[]).map((r:any)=>({ ...r, id: r._id, sales_id: r.sales_id })),
+          stats: data.stats,
+          activePeriod: data.activePeriod ? { ...data.activePeriod, id: data.activePeriod._id } : null
+        };
+        return NextResponse.json(mapped);
+      }
     }catch{}
   }
   const db=await getDB();
