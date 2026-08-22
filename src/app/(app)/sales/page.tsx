@@ -41,15 +41,17 @@ export default function SalesPage() {
       <Card>
         <CardHeader title={`الموظفون (${filtered.length})`} />
         {filtered.length === 0 ? <Empty title="لا يوجد موظفون" /> : (
-          <div className="overflow-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-slate-600"><tr><th className="p-3 text-right">الاسم</th><th className="p-3">الفريق</th><th className="p-3">القائد</th></tr></thead>
+          <div className="overflow-auto rounded-xl border border-slate-200">
+            <table className="w-full text-sm table-fixed" dir="rtl">
+              <colgroup><col className="w-[8%]" /><col className="w-[28%]" /><col className="w-[32%]" /><col className="w-[32%]" /></colgroup>
+              <thead className="bg-slate-50 text-slate-700"><tr><th className="p-3.5 text-center font-bold">#</th><th className="p-3.5 text-right font-bold">الاسم</th><th className="p-3.5 text-right font-bold">الفريق</th><th className="p-3.5 text-right font-bold">القائد</th></tr></thead>
               <tbody>
-                {filtered.map((s: any) => (
-                  <tr key={s.id} className="border-t border-slate-100">
-                    <td className="p-3 font-medium">{s.name}</td>
-                    <td className="p-3">{s.team_name || "—"}</td>
-                    <td className="p-3">{s.team_leader_name || "—"}</td>
+                {filtered.map((s: any, idx:number) => (
+                  <tr key={s.id} className="border-t border-slate-200 hover:bg-slate-50 h-[52px] transition">
+                    <td className="p-3.5 text-center font-bold text-slate-500">{idx+1}</td>
+                    <td className="p-3.5 font-bold text-black text-right truncate">{s.name}</td>
+                    <td className="p-3.5 text-right text-slate-700 truncate">{s.team_name || "—"}</td>
+                    <td className="p-3.5 text-right text-slate-700 truncate">{s.team_leader_name || "—"}</td>
                   </tr>
                 ))}
               </tbody>

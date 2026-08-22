@@ -45,12 +45,23 @@ export default function ReportsPage() {
 
   if (loading) return <Loading />;
 
+  const grouped = (() => {
+    if (user?.role !== "admin") return null;
+    const map = new Map<string, { leader: string; team: string; reports: any[] }>();
+    for (const r of filtered) {
+      const key = r.team_leader_name || r.team_name || "غير معروف";
+      if (!map.has(key)) map.set(key, { leader: key, team: r.team_name || r.team_leader_name || "—", reports: [] });
+      map.get(key)!.reports.push(r);
+    }
+    return Array.from(map.values());
+  })();
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-black text-black tracking-tight">التقارير</h1>
-          <p className="text-sm text-neutral-500">عرض وتصدير وطباعة التقارير — {filtered.length} تقرير</p>
+          <p className="text-sm text-neutral-500">عرض وتصدير وطباعة التقارير — {filtered.length} تقرير {user?.role==="admin" && grouped ? `• ${grouped.length} قائد` : ""}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="ghost" onClick={exportCSV} className="border border-neutral-200">تصدير Excel/CSV</Button>
@@ -73,7 +84,51 @@ export default function ReportsPage() {
           </Select>
         </div>
 
-        {filtered.length === 0 ? <Empty title="لا توجد تقارير" /> : (
+        {filtered.length === 0 ? <Empty title="لا توجد تقارير" /> : user?.role==="admin" && grouped ? (
+          <div className="p-4 space-y-6">
+            {grouped.map((g:any)=> (
+              <div key={g.leader} className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+                <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-4 flex items-center justify-between">
+                  <div>
+                    <div className="font-black text-[15px]">{g.leader}</div>
+                    <div className="text-xs text-slate-300 mt-1">{g.team} • {g.reports.length} تقرير</div>
+                  </div>
+                  <Badge color="sky">{g.reports.length} تقرير</Badge>
+                </div>
+                <div className="overflow-auto">
+                  <table className="w-full table-fixed" dir="rtl">
+                    <colgroup><col className="w-[7%]" /><col className="w-[24%]" /><col className="w-[18%]" /><col className="w-[18%]" /><col className="w-[16%]" /><col className="w-[17%]" /></colgroup>
+                    <thead className="bg-slate-50 text-slate-600"><tr><th className="p-3 text-center">#</th><th className="p-3 text-right">الموظف</th><th className="p-3 text-center">الفترة</th><th className="p-3 text-center">الحالة</th><th className="p-3 text-center">آخر تحديث</th><th className="p-3 text-center no-print">إجراءات</th></tr></thead>
+                    <tbody>
+                      {g.reports.map((r:any, idx:number)=>{
+                        const isRead = r.status==="reviewed";
+                        const isPending = r.status==="submitted";
+                        return (
+                          <tr key={r.id} className={`border-t border-slate-200 h-[52px] transition ${isRead ? "bg-emerald-50/40 hover:bg-emerald-50" : isPending ? "bg-amber-50/40 hover:bg-amber-50" : "hover:bg-slate-50"}`}>
+                            <td className="p-3 text-center font-bold text-slate-500">{idx+1}</td>
+                            <td className="p-3 font-bold text-black text-right truncate">{r.sales_name || r.sales_id}</td>
+                            <td className="p-3 text-center text-sm" dir="ltr">{r.evaluation_period}</td>
+                            <td className="p-3 text-center">
+                              {isRead ? <Badge color="emerald">مقروء ✓</Badge> : isPending ? <Badge color="amber">قيد المراجعة</Badge> : <StatusBadge status={r.status} />}
+                            </td>
+                            <td className="p-3 text-center text-xs font-medium" dir="ltr">{new Date(r.updated_at).toLocaleDateString("en-GB")}</td>
+                            <td className="p-3 text-center no-print">
+                              <div className="flex gap-1.5 justify-center items-center">
+                                <Link href={`/reports/${r.id}`} className={`px-4 py-1.5 rounded-xl text-xs font-bold min-w-[64px] text-center transition ${isRead ? "bg-emerald-600 hover:bg-emerald-700 text-white" : isPending ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-slate-900 hover:bg-black text-white"}`}>عرض</Link>
+                                {isPending && <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1">بانتظار المراجعة</span>}
+                                {isRead && <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1">تمت القراءة</span>}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
           <div className="overflow-auto">
             <table className="w-full table-fixed" dir="rtl">
               <colgroup>
@@ -96,17 +151,20 @@ export default function ReportsPage() {
               </thead>
               <tbody>
                 {filtered.map((r: any, idx:number) => {
+                  const isRead = r.status==="reviewed";
+                  const isPending = r.status==="submitted";
                   return (
-                    <tr key={r.id} className="border-t border-neutral-200 hover:bg-neutral-50 h-[56px] transition">
+                    <tr key={r.id} className={`border-t border-neutral-200 h-[56px] transition ${isRead ? "bg-emerald-50/30" : isPending ? "bg-amber-50/20" : "hover:bg-neutral-50"}`}>
                       <td className="p-3.5 text-center font-bold text-neutral-500 text-[13px]">{idx + 1}</td>
                       <td className="p-3.5 font-bold text-black text-[14px] text-right truncate">{r.sales_name || r.sales_id}</td>
                       <td className="p-3.5 text-center font-medium text-black text-[13px]" dir="ltr">{r.evaluation_period}</td>
-                      <td className="p-3.5 text-center"><StatusBadge status={r.status} /></td>
+                      <td className="p-3.5 text-center">{isRead ? <Badge color="emerald">مقروء ✓</Badge> : isPending ? <Badge color="amber">قيد المراجعة</Badge> : <StatusBadge status={r.status} />}</td>
                       <td className="p-3.5 text-center font-medium text-black text-[13px]" dir="ltr">{new Date(r.updated_at).toLocaleDateString("en-GB")}</td>
                       <td className="p-3.5 text-center no-print">
                         <div className="flex gap-1.5 justify-center items-center">
-                          <Link href={`/reports/${r.id}`} className="px-4 py-1.5 rounded-xl bg-[#0F172A] text-white text-xs font-bold hover:bg-black transition min-w-[64px] text-center">عرض</Link>
-                          {user?.role === "admin" && r.status === "submitted" && <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1">بانتظار المراجعة</span>}
+                          <Link href={`/reports/${r.id}`} className={`px-4 py-1.5 rounded-xl text-xs font-bold min-w-[64px] text-center transition ${isRead ? "bg-emerald-600 hover:bg-emerald-700 text-white" : isPending ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"}`}>عرض</Link>
+                          {isPending && <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1">بانتظار المراجعة</span>}
+                          {isRead && <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1">تمت القراءة</span>}
                         </div>
                       </td>
                     </tr>

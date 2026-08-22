@@ -89,20 +89,22 @@ export default function TeamsPage() {
             </div>
             <div className="p-4">
               {loadingMembers ? <Loading /> : members.length===0 ? <Empty title="لا يوجد أعضاء" desc="هذا الفريق فارغ" /> : (
-                <div className="overflow-auto">
+                <div className="overflow-auto rounded-xl border border-slate-200">
                   <table className="w-full text-sm table-fixed" dir="rtl">
-                    <colgroup><col className="w-[30%]" /><col className="w-[20%]" /><col className="w-[20%]" /><col className="w-[30%]" /></colgroup>
-                    <thead className="bg-slate-50 text-slate-600"><tr><th className="p-3 text-right">الاسم</th><th className="p-3 text-center">تاريخ الانضمام</th><th className="p-3 text-center">الحالة</th><th className="p-3 text-center">عرض التقييم</th></tr></thead>
+                    <colgroup><col className="w-[22%]" /><col className="w-[16%]" /><col className="w-[16%]" /><col className="w-[22%]" /><col className="w-[24%]" /></colgroup>
+                    <thead className="bg-slate-50 text-slate-600"><tr><th className="p-3 text-right font-bold">الاسم</th><th className="p-3 text-center font-bold">تاريخ الانضمام</th><th className="p-3 text-center font-bold">الحالة</th><th className="p-3 text-center font-bold">آخر تحديث</th><th className="p-3 text-center font-bold">عرض التقييم</th></tr></thead>
                     <tbody>
                       {members.map((m:any)=>{
                         const st = getStatus(m.id);
+                        const lastUpdate = st.ev ? new Date(st.ev.updated_at).toLocaleString("en-GB", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" }) : (m.created_at ? new Date(m.created_at).toLocaleString("en-GB", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" }) : "—");
                         return (
-                          <tr key={m.id} className="border-t border-slate-200 hover:bg-slate-50 h-[56px]">
+                          <tr key={m.id} className="border-t border-slate-200 hover:bg-slate-50 h-[58px] transition">
                             <td className="p-3 font-bold text-black text-right truncate">{m.name}</td>
-                            <td className="p-3 text-center" dir="ltr">{m.join_date ? new Date(m.join_date).toLocaleDateString("en-GB") : "—"}</td>
+                            <td className="p-3 text-center text-slate-700 text-xs font-medium" dir="ltr">{m.join_date ? new Date(m.join_date).toLocaleDateString("en-GB") : "—"}</td>
                             <td className="p-3 text-center"><Badge color={st.color as any}>{st.label}</Badge></td>
+                            <td className="p-3 text-center text-slate-600 text-xs font-medium" dir="ltr">{lastUpdate}</td>
                             <td className="p-3 text-center">
-                              {st.ev ? <Button size="sm" onClick={()=>openEval(m.id)} className="min-w-[80px]">عرض التقييم</Button> : <span className="text-xs text-slate-400">لا يوجد</span>}
+                              {st.ev ? <Button size="sm" onClick={()=>openEval(m.id)} className="min-w-[84px] shadow-sm">عرض التقييم</Button> : <span className="text-xs text-slate-400">لا يوجد</span>}
                             </td>
                           </tr>
                         );
