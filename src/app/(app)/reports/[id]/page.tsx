@@ -19,7 +19,18 @@ export default function ReportDetail() {
     setUser(u);
     fetch(`/api/evaluations/${id}`, { headers: { Authorization: `Bearer ${token()}` } })
       .then((r) => r.json())
-      .then((d) => { setData(d); setAdminNotes(d.admin_notes || ""); })
+      .then(async (d) => {
+        setData(d);
+        setAdminNotes(d.admin_notes || "");
+        // ثانياً: لما الأدمن يدخل التقرير يسجل تلقائياً أنه تمت المراجعة له وللتيم ليدر
+        if (d && !d.error && u?.role === "admin" && d.status === "submitted") {
+          try {
+            await fetch(`/api/evaluations/${id}/status`, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` }, body: JSON.stringify({ status: "reviewed", admin_notes: d.admin_notes || "" }) });
+            // حدث البيانات محلياً ليظهر مقروء ✓
+            setData((prev:any)=> prev ? { ...prev, status: "reviewed", reviewed_at: Date.now() } : prev);
+          } catch {}
+        }
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
