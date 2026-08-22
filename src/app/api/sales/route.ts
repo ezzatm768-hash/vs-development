@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { getDB, persist, uid } from "@/lib/serverDb";
 import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET || "vs-sales-system-secret-key-2026";
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "";
 function auth(req: Request){ const h=req.headers.get("authorization")||""; const t=h.startsWith("Bearer ")?h.slice(7):""; if(!t) return null; try{return jwt.verify(t,JWT_SECRET) as any}catch{return null} }
 async function getConvex(){
+  const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || process.env.CONVEX_URL || "";
   if(!CONVEX_URL || CONVEX_URL.includes("127.0.0.1")) return null;
   try{ const { ConvexHttpClient } = await import("convex/browser"); return new ConvexHttpClient(CONVEX_URL); }catch{ return null; }
 }
