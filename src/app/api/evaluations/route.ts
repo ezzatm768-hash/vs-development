@@ -28,8 +28,9 @@ export async function GET(req: Request) {
         const url = new URL(req.url);
         const search = url.searchParams.get("search") || undefined;
         const status = url.searchParams.get("status") || undefined;
-        const data = await convex.query("evaluations:list" as any, { callerId, search, status });
-        return NextResponse.json(data);
+        const data:any = await convex.query("evaluations:list" as any, { callerId, search, status });
+        const mapped = data.map((e:any)=>({ ...e, id: e._id }));
+        return NextResponse.json(mapped);
       }
     }catch{}
   }
