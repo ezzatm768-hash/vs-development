@@ -265,8 +265,15 @@ export default function Dashboard() {
                 <tbody>
                   {members.filter((m:any)=> !search || m.name.toLowerCase().includes(search.toLowerCase())).map((m:any, idx:number)=>{
                     const ev = evals.filter((e:any)=>e.sales_id===m.id).sort((a:any,b:any)=>b.updated_at-a.updated_at)[0];
-                    const statusLabel = ev?.employee_status || (ev? (ev.status==="draft"?"مسودة":"مرسل") : "لم يتم التقييم");
-                    const color = statusLabel==="لم يتم التقييم"?"slate": statusLabel==="يحتاج متابعة"||statusLabel==="يحتاج تدريب"?"amber": statusLabel==="مشكلة"?"red": statusLabel==="جيد"||statusLabel==="ممتاز"?"emerald":"sky";
+                    const required = ["product_knowledge","communication","needs_discovery","sales_process","crm_discipline","follow_up_activity","strengths","weaknesses","main_problem","final_notes"];
+                    const filled = ev ? required.filter((k)=> ev[k] && String(ev[k]).trim().length>0).length : 0;
+                    let statusLabel = "لم يتم التقييم";
+                    let color: string = "slate";
+                    if(ev){
+                      if(filled===0){ statusLabel = ev.employee_status || "لم يتم التقييم"; color = "slate"; }
+                      else if(filled < required.length){ statusLabel = "برجاء الإستكمال"; color = "red"; }
+                      else { statusLabel = ev.employee_status || (ev.status==="draft"?"مسودة": ev.status==="submitted"?"مرسل":"مكتمل"); color = statusLabel==="يحتاج متابعة"||statusLabel==="يحتاج تدريب"?"amber": statusLabel==="مشكلة"?"red": statusLabel==="جيد"||statusLabel==="ممتاز"?"emerald": statusLabel==="برجاء الإستكمال"?"red":"sky"; }
+                    }
                     return (
                       <tr key={m.id} className="border-t border-slate-200 hover:bg-slate-50 h-[56px] transition">
                         <td className="p-3 text-center font-bold text-neutral-500">{idx + 1}</td>
@@ -284,10 +291,14 @@ export default function Dashboard() {
             <div className="md:hidden p-3 grid gap-3">
               {members.filter((m:any)=> !search || m.name.toLowerCase().includes(search.toLowerCase())).map((m:any)=>{
                 const ev = evals.filter((e:any)=>e.sales_id===m.id).sort((a:any,b:any)=>b.updated_at-a.updated_at)[0];
-                const statusLabel = ev?.employee_status || (ev? "مسودة":"لم يتم التقييم");
+                const requiredM = ["product_knowledge","communication","needs_discovery","sales_process","crm_discipline","follow_up_activity","strengths","weaknesses","main_problem","final_notes"];
+                const filledM = ev ? requiredM.filter((k)=> ev[k] && String(ev[k]).trim().length>0).length : 0;
+                let statusLabelM = "لم يتم التقييم";
+                if(ev){ if(filledM===0) statusLabelM = ev.employee_status || "لم يتم التقييم"; else if(filledM < requiredM.length) statusLabelM = "برجاء الإستكمال"; else statusLabelM = ev.employee_status || (ev.status==="draft"?"مسودة":"مرسل"); }
+                const colorM = statusLabelM==="برجاء الإستكمال"?"red":undefined;
                 return (
                   <div key={m.id} className="rounded-2xl border border-slate-200 p-4 bg-white">
-                    <div className="flex items-center justify-between"><span className="font-bold text-black">{m.name}</span><Badge>{statusLabel}</Badge></div>
+                    <div className="flex items-center justify-between"><span className="font-bold text-black">{m.name}</span><Badge color={colorM as any}>{statusLabelM}</Badge></div>
                     <div className="text-xs text-slate-500 mt-1 flex gap-3" dir="ltr"><span>آخر تقييم: {ev?.submitted_at? new Date(ev.submitted_at).toLocaleDateString("en-GB"):"—"}</span><span>تحديث: {ev? new Date(ev.updated_at).toLocaleDateString("en-GB"): new Date(m.created_at).toLocaleDateString("en-GB")}</span></div>
                     <div className="flex gap-2 mt-3"><Link href={`/evaluations?sales=${m.id}`} className="flex-1 text-center px-3 py-2 rounded-xl bg-[#0F172A] text-white text-xs font-bold">تقييم</Link><button onClick={()=>openDetails(m.id)} className="flex-1 px-3 py-2 rounded-xl bg-white border border-slate-200 text-black text-xs font-bold">عرض</button></div>
                   </div>
